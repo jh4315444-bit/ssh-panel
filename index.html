@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile SSH Panel</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: #fff; padding: 20px; text-align: center; }
+        .container { background: #1e1e1e; padding: 25px; border-radius: 12px; max-width: 400px; margin: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        input { width: 90%; padding: 12px; margin: 10px 0; border-radius: 6px; border: 1px solid #333; background: #252525; color: #fff; }
+        button { width: 95%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        #result { margin-top: 15px; font-size: 14px; word-break: break-all; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>FastSSH Mobile Panel</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="createSSH()">Create Account</button>
+    <div id="result"></div>
+</div>
+
+<script>
+async function createSSH() {
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+    const resultDiv = document.getElementById('result');
+
+    if(!user || !pass) {
+        alert("অনুগ্রহ করে সব ঘর পূরণ করুন!");
+        return;
+    }
+
+    resultDiv.style.color = "#ffc107";
+    resultDiv.innerText = "সার্ভারে অ্যাকাউন্ট তৈরি হচ্ছে... অপেক্ষা করুন...";
+
+    // আপনার Pipedream এর সঠিক Webhook URL
+    const webhookUrl = "https://eoikkcwupa1v29n.m.pipedream.net"; 
+
+    try {
+        const response = await fetch(webhookUrl, {
+            method: "POST",
+            mode: "cors", // CORS ইরর ফিক্স করার জন্য মোড যুক্ত করা হলো
+            headers: { 
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ username: user, password: pass })
+        });
+
+        const data = await response.json();
+
+        if(data.success) {
+            resultDiv.style.color = "#28a745";
+            resultDiv.innerHTML = `<h3>অ্যাকাউন্ট তৈরি সফল হয়েছে!</h3>
+                                   <b>Host:</b> YOUR_VPS_IP<br>
+                                   <b>Username:</b> ${user}<br>
+                                   <b>Password:</b> ${pass}<br>
+                                   <b>Expired:</b> 3 Days`;
+        } else {
+            resultDiv.style.color = "#dc3545";
+            resultDiv.innerText = "ব্যর্থ হয়েছে: " + data.message;
+        }
+    } catch (error) {
+        resultDiv.style.color = "#dc3545";
+        resultDiv.innerText = "Error Connecting to API!";
+    }
+}
+</script>
+</body>
+</html>
